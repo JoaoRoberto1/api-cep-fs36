@@ -1,31 +1,56 @@
-document.querySelector('#cep-input').addEventListener('input', async (event) => {
-    const cep = event.target.value.replace(/\D/g, ''); 
-    const estado = document.querySelector('#estado');
-    const cidade = document.querySelector('#cidade');
-    const bairro = document.querySelector('#bairro');
-    const rua = document.querySelector('#rua');
+const cep = document.querySelector('#cep');
+const numero = document.querySelector('#numero');
 
-    if (cep.length === 8) {
-        try {
-            const response = await axios.get(`https://brasilapi.com.br/api/cep/v2/${cep}`);
-            const data = response.data;
-            estado.value = data.state || '';
-            cidade.value = data.city || '';
-            bairro.value = data.neighborhood || '';
-            rua.value = data.street || '';
-        } catch (error) {
-            console.error('Erro ao buscar o CEP:', error);
-            alert('CEP NÃO ENCONTRADO');
-    
-            estado.value = '';
-            cidade.value = '';
-            bairro.value = '';
-            rua.value = '';
-        }
-    } else {
-        estado.value = '';
-        cidade.value = '';
-        bairro.value = '';
-        rua.value = '';
+async function preencherEstados() {
+    try {
+        const respostaLocalidade = await axios.get('https://servicodados.ibge.gov.br/api/v1/localidades/estados');
+        const estados = respostaLocalidade.data;
+        
+        estados.forEach(estado => {
+            console.log(estado.nome);
+        });
+
+    } catch (erro) {
+        console.error('Erro ao buscar os estados:', erro);
     }
-});
+    
+    
+}
+
+
+// Chama a função para preencher os estados
+preencherEstados();
+
+
+// Call the function to populate states
+preencherEstados();
+
+
+const consultaCep = async () => {
+  let cepValue = cep.value;
+  console.log(cepValue);
+
+  if (cepValue.length === 8) {
+    try {
+      const res = await axios.get(`https://brasilapi.com.br/api/cep/v2/${cepValue}`);
+      console.log(res.data);
+
+      preencherCampos(res.data);
+      numero.focus();
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+}
+
+const preencherCampos = data => {
+  const logradouro = document.querySelector('#logradouro');
+  const bairro = document.querySelector('#bairro');
+  const uf = document.querySelector('#uf');
+
+  logradouro.value = data.street;
+  bairro.value = data.neighborhood;
+  uf.value = data.state;
+
+}
